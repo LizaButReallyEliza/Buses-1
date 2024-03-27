@@ -1,0 +1,103 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <limits>
+
+const unsigned int INF = std::numeric_limits<unsigned int>::max();
+
+void floydWarshall(std::vector<std::vector<unsigned int>>& dist) {
+    unsigned int N = dist.size();
+    for (unsigned int k = 0; k < N; ++k) {
+        for (unsigned int i = 0; i < N; ++i) {
+            for (unsigned int j = 0; j < N; ++j) {
+                if (dist[i][k] != INF && dist[k][j] != INF) {
+                    dist[i][j] = std::min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+}
+
+void addStreet(unsigned int A, unsigned int B, unsigned int weight, std::vector<std::vector<unsigned int>>& dist) {
+    dist[A][B] = dist[B][A] = weight;
+    unsigned int N = dist.size();
+    for (unsigned int k = 0; k < N; ++k) {
+        for (unsigned int i = 0; i < N; ++i) {
+            for (unsigned int j = 0; j < N; ++j) {
+                dist[i][j] = std::min(dist[i][j], dist[i][k] + dist[k][j]);
+            }
+        }
+    }
+}
+
+
+void dijkstra(unsigned int start, unsigned int end, const std::vector<std::vector<unsigned int>>& graph,
+std::vector<unsigned int>& path) {
+    unsigned int n = graph.size();
+    std::vector<bool> visited(n, false);
+    std::vector<unsigned int> dist(n, INF);
+    std::vector<int> prev(n, -1);
+
+    dist[start] = 0;
+    std::priority_queue<std::pair<unsigned int, unsigned int>, std::vector<std::pair<unsigned int, unsigned int>>,
+std::greater<std::pair<unsigned int, unsigned int>>> pq;
+    pq.push({0, start});
+
+    while (!pq.empty()) {
+        unsigned int u = pq.top().second;
+        pq.pop();
+
+        if (u == end) break;
+        if (visited[u]) continue;
+        visited[u] = true;
+
+        for (unsigned int v = 0; v < n; ++v) {
+            if (!visited[v] && graph[u][v] != INF && dist[v] > dist[u] + graph[u][v]) {
+                dist[v] = dist[u] + graph[u][v];
+                prev[v] = u;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+}
+
+int main() {
+    unsigned int N, M;
+    std::cin >> N >> M;
+
+    std::vector<std::vector<unsigned int>> dist(N, std::vector<unsigned int>(N, INF));
+    for (unsigned int i = 0; i < M; ++i) {
+        unsigned int u, v, k;
+        std::cin >> u >> v >> k;
+        dist[u][v] = dist[v][u] = k;
+    }
+
+    floydWarshall(dist);
+
+    std::string operation;
+    while (std::cin >> operation) {
+        if (operation == "add_bus") {
+            unsigned int A, B;
+            std::cin >> A >> B;
+            std::vector<unsigned int> path;
+            dijkstra(A, B, dist, path);
+            std::cout << dist[A][B] << std::endl;
+        } else if (operation == "construct_street") {
+            unsigned int A, B, weight;
+            std::cin >> A >> B >> weight;
+            addStreet(A, B, weight, dist);
+        } else if (operation == "details") {
+            unsigned int busNumber, A, B;
+            std::cin >> busNumber >> A >> B;
+            std::vector<unsigned int> path;
+            dijkstra(A, B, dist, path);
+            std::cout << "Path for bus " << busNumber << " from " << A << " to " << B << ": ";
+            for (unsigned int i = 0; i < path.size(); ++i) {
+                std::cout << path[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+    return 0;
+}
