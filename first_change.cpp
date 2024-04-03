@@ -21,7 +21,7 @@ void floydWarshall(std::vector<std::vector<unsigned int>>& dist) {
 void addStreet(unsigned int A, unsigned int B, unsigned int weight, std::vector<std::vector<unsigned int>>& dist) {
     dist[A][B] = dist[B][A] = weight;
     unsigned int N = dist.size();
-    
+
     for (unsigned int i = 0; i < N; ++i) {
         for (unsigned int j = 0; j < N; ++j) {
             if (dist[i][j] <= weight) {
@@ -51,13 +51,13 @@ void printPath(unsigned int start, unsigned int end, const std::vector<int>& pre
 
 std::vector<int> dijkstra(unsigned int start, unsigned int end, const std::vector<std::vector<unsigned int>>& graph) {
     unsigned int n = graph.size();
-    std::vector<bool> visited(n, false);
     std::vector<unsigned int> dist(n, INF);
     std::vector<int> prev(n, -1);
+    std::vector<bool> visited(n, false);
 
     dist[start] = 0;
     std::priority_queue<std::pair<unsigned int, unsigned int>, std::vector<std::pair<unsigned int, unsigned int>>,
-    std::greater<std::pair<unsigned int, unsigned int>>> pq;
+                        std::greater<std::pair<unsigned int, unsigned int>>> pq;
     pq.push({0, start});
 
     while (!pq.empty()) {
@@ -69,7 +69,7 @@ std::vector<int> dijkstra(unsigned int start, unsigned int end, const std::vecto
         visited[u] = true;
 
         for (unsigned int v = 0; v < n; ++v) {
-            if (!visited[v] && graph[u][v] != INF && dist[v] > dist[u] + graph[u][v]) {
+            if (graph[u][v] != INF && dist[v] > dist[u] + graph[u][v]) {
                 dist[v] = dist[u] + graph[u][v];
                 prev[v] = u;
                 pq.push({dist[v], v});
